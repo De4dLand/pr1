@@ -30,7 +30,7 @@ class ProductListScreen extends StatefulWidget
 class _ProductListScreenState  extends State<ProductListScreen>{
   late List<Product> products= [];
   //hàm khởi tạo
-  final Cart cart= Cart();
+  final Cart cart= Cart();//Khởi tạo giỏ hàng
   @override
   void initState() {
     super.initState();
@@ -152,7 +152,10 @@ class ProductDetailScreen extends StatelessWidget {
          Padding(padding: const EdgeInsets.all(8.0),
          child: Text('Brand: ${product.brands_filter_facet}'),
          ),
-         Image.network(product.search_image),
+         Image.network(product.search_image,
+           width: 500,
+           height: 500,
+           fit: BoxFit.cover,),
          Padding(padding: const EdgeInsets.all(8.0),
           child: Text('Info: ${product.product_additional_info}',
          style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
@@ -175,7 +178,9 @@ class Cart
 {
   List<Product> items = [];
 
-  void addToCart(Product product) {}
+  void addToCart(Product product) {
+    items.add(product);
+  }
 
 }
 class CartScreen extends StatelessWidget
@@ -191,10 +196,16 @@ class CartScreen extends StatelessWidget
           itemBuilder: (context,index)
       {
         return ListTile(
-          title: Text(cart.items[index].search_image),
-          subtitle: Text(cart.items[index].price),
+          title: Text(cart.items[index].brands_filter_facet),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(cart.items[index].price),Text(cart.items[index].styleid)
+            ],
+          ),
         );
       }),
+
     );
   }
 
