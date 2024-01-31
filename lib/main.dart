@@ -28,19 +28,19 @@ class ProductListScreen extends StatefulWidget
 }
 //Bước 3:Define Activity:Lấy dữ liệu từ server về
 class _ProductListScreenState  extends State<ProductListScreen>{
-  late List<Product> products;
+  late List<Product> products= [];
   //hàm khởi tạo
+  final Cart cart= Cart();
   @override
   void initState() {
     super.initState();
-    products = [];
     fetchProduct();//Hàm lấy dữ liệu từ server
   }
   //Hàm đọc dữ liệu từ server
   Future<void> fetchProduct() async
   {
-    String url ="http://192.168.1.100/server/get.php";
-    final response = await http.get(Uri.parse(url));
+    String url ="http://192.168.165.202/server/get.php";
+    final response = await http.get(Uri.parse(url),headers:{ "Access-Control_Allow_Origin": "*"});
     if (response.statusCode == 200)
       {
         final Map<String, dynamic> data =json.decode(response.body);
@@ -80,7 +80,7 @@ class _ProductListScreenState  extends State<ProductListScreen>{
     var i= products.length;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Danh sach san pham"),
+        title: const Text("Danh sach san pham"),
       ),
       body: products != null ?
       ListView.builder(
@@ -105,13 +105,13 @@ class _ProductListScreenState  extends State<ProductListScreen>{
           onTap: (){
             //click on items
             Navigator.push(context,
-              MaterialPageRoute(builder: (context)=>ProductDetailScreen(products[index]),
+              MaterialPageRoute(builder: (context)=>ProductDetailScreen(products[index],cart),
             ),
             );
           },
         );
       })
-          :Center(
+          :const Center(
         child: CircularProgressIndicator(),
       )
     );
@@ -120,25 +120,24 @@ class _ProductListScreenState  extends State<ProductListScreen>{
 //Dinh nghia chi tiet san pham
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
-
-  ProductDetailScreen(this.product, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
-/*
+  final Cart cart;
+  const ProductDetailScreen(this.product,this.cart) ;
   @override
   Widget build(BuildContext context) {
    return Scaffold(
      appBar: AppBar(
        title: Text("Thong tin san pham"),
        actions: [
-         ElevatedButton(onPressed: ()
+         ElevatedButton(
+           onPressed: ()
        {
+         cart.addToCart(product);
+         //dua ra thong bao
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('San pham da duoc them vao gio hang'))
+         );
          Navigator.push(context,
-         MaterialPageRoute(builder: (context)=> CartScreen()),);
+         MaterialPageRoute(builder: (context)=> CartScreen(cart)),);
        }, child: Icon(Icons.shopping_cart),
           style: ElevatedButton.styleFrom(
             shape: CircleBorder(),
@@ -151,20 +150,54 @@ class ProductDetailScreen extends StatelessWidget {
        crossAxisAlignment: CrossAxisAlignment.start,
        children: [
          Padding(padding: const EdgeInsets.all(8.0),
-         child: Text('Nhanh: ${product.brand_filter_faucet}'),
+         child: Text('Brand: ${product.brands_filter_facet}'),
          ),
          Image.network(product.search_image),
          Padding(padding: const EdgeInsets.all(8.0),
-         child: Text(product.product_additional_info,
-         style: TextStyle(fontSize: 18,fontWeight.bold),),
+          child: Text('Info: ${product.product_additional_info}',
+         style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
+            ),
          ),
+         Padding(padding: const EdgeInsets.all(8.0),
+         child: Text('ID: ${product.styleid}'),
+
+         ),
+         Padding(padding: const EdgeInsets.all(8.0),
+         child: Text('Price: ${product.price}'),)
        ],
      ),
    );
   }
 
 }
- */
+//xu ly gio hang
+class Cart
+{
+  List<Product> items = [];
+
+  void addToCart(Product product) {}
+
+}
+class CartScreen extends StatelessWidget
+{
+  final Cart cart;
+  CartScreen(this.cart);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Shopping Cart"),),
+      body: ListView.builder(
+          itemCount: cart.items.length,
+          itemBuilder: (context,index)
+      {
+        return ListTile(
+          title: Text(cart.items[index].search_image),
+          subtitle: Text(cart.items[index].price),
+        );
+      }),
+    );
+  }
+
 }
 void main() {
   runApp(const MyApp());
@@ -197,7 +230,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ProductListScreen(),
+      home: const ProductListScreen(),
     );
   }
 }
