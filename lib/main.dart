@@ -203,6 +203,12 @@ class CartScreen extends StatelessWidget
               Text(cart.items[index].price),Text(cart.items[index].styleid)
             ],
           ),
+            leading: Image.network(
+            cart.items[index].search_image,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+            )
         );
       }),
 
